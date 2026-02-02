@@ -16,7 +16,7 @@ const config: Config = {
         grey4: "var(--grey4)",
         grey5: "var(--grey5)",
         link: "var(--link)",
-        secondary: "#f215fa",
+        secondary: "#3B82F6 ",
         card: "var(--card-bg)", // Custom card background color
       },
       background: {
