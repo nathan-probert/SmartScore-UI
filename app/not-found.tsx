@@ -6,9 +6,9 @@ export const metadata = {
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-center bg-gray-100 p-5">
-      <h1 className="text-6xl font-bold text-gray-800">404</h1>
-      <p className="text-lg text-gray-600 my-4">
+    <div className="flex flex-col items-center justify-center h-screen text-center p-5">
+      <h1 className="text-6xl font-bold text-gray-500">404</h1>
+      <p className="text-lg text-gray-500 my-4">
         Oops! The page you&apos;re looking for doesn&apos;t exist.
       </p>
 
