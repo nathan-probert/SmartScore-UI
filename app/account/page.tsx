@@ -42,7 +42,7 @@ export default function AccountPage() {
         setError(null);
         const { error } = await supabase
             .from("user_preferences")
-            .upsert({ user_id: user.id, notify: !prefs?.notify }, { onConflict: ["user_id"] });
+            .upsert({ user_id: user.id, notify: !prefs?.notify }, { onConflict: "user_id" });
         if (error) {
             setError("Failed to update preference.");
         } else {
