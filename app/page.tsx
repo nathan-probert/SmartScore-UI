@@ -270,10 +270,12 @@ export default function PlayerTables() {
           )}
         </>
       )}
-      {/* Always show the toggle button at the bottom */}
-      <div className="flex justify-center mb-24">
-        <SmartScoreModeToggle onClick={handleToggleChange} />
-      </div>
+      {/* Only show toggle if there are any games */}
+      {sortedPlayers.all.length > 0 && (
+        <div className="flex justify-center mb-24">
+          <SmartScoreModeToggle onClick={handleToggleChange} />
+        </div>
+      )}
     </div>
   );
 }  
