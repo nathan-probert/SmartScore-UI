@@ -234,10 +234,14 @@ export default function PlayerTables() {
         </>
       ) : (
         <>
-          <HistoryBar history={history} />
-          <div className="w-full flex justify-center my-6">
-            <div className="w-full max-w-3xl h-1 bg-gray-700 rounded" />
-          </div>
+          {history.length > 0 && (
+            <>
+              <HistoryBar history={history} />
+              <div className="w-full flex justify-center my-6">
+                <div className="w-full max-w-3xl h-1 bg-gray-700 rounded" />
+              </div>
+            </>
+          )}
 
           {sortedPlayers.all.length === 0 ? (
             <div className="flex justify-center items-center px-4 text-center">
@@ -270,10 +274,12 @@ export default function PlayerTables() {
           )}
         </>
       )}
-      {/* Always show the toggle button at the bottom */}
-      <div className="flex justify-center mb-24">
-        <SmartScoreModeToggle onClick={handleToggleChange} />
-      </div>
+      {/* Only show toggle if there are any games */}
+      {sortedPlayers.all.length > 0 && (
+        <div className="flex justify-center mb-24">
+          <SmartScoreModeToggle onClick={handleToggleChange} />
+        </div>
+      )}
     </div>
   );
 }  

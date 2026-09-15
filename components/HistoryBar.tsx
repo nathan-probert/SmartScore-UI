@@ -11,6 +11,7 @@ const formatName = (name: string) => {
 };
 
 export function HistoryBar({ history }: { history: HistoryEntry[] }) {
+    if (!history || history.length === 0) return null;
     return (
         <div className="flex flex-col items-center mt-6">
             <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg flex justify-center mb-6 px-2">
