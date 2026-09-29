@@ -78,6 +78,17 @@ function getSeasonMetricId(seasonId: string): string {
   return `season_pick_accuracy_${seasonId}`;
 }
 
+// Feature flag: show the smaller All-Time stat next to the season stat.
+// Set to false to show season stats only (season becomes centered).
+const SHOW_ALL_TIME_STATS = false;
+
+function formatSeasonRange(seasonId: string): string {
+  if (seasonId.length === 8) {
+    return `${seasonId.slice(0, 4)}-${seasonId.slice(6)}`;
+  }
+  return seasonId;
+}
+
 async function newFetchPlayers(table_name: string): Promise<Player[]> {
   const { data, error } = await supabase.from(table_name).select('*');
   if (error) {
@@ -259,17 +270,17 @@ export default function PlayerTables() {
   return (
     <div>
 
-      {/* Season (primary) + lifetime side by side; stacked on mobile */}
+      {/* Season stat is primary and centered. All-Time is optional via SHOW_ALL_TIME_STATS. */}
       <div className="w-full mt-6 md:mt-4 px-4 md:px-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16" style={{ minHeight: '70px' }}>
         <div className="flex flex-col items-center justify-center" style={{ width: 'max-content' }}>
           <span className="text-3xl md:text-5xl font-bold text-pink-600 leading-tight">
             {seasonAccuracy !== null ? `${seasonAccuracy.toFixed(2)}%` : '0.00%'}
           </span>
           <div className="text-lg md:text-2xl text-gray-500 font-medium leading-tight text-center">
-            This Season {seasonId.length === 8 ? `(${seasonId.slice(0, 4)}-${seasonId.slice(6)})` : ''}{seasonRecord ? ` (${seasonRecord.correct}/${seasonRecord.total})` : ' (0/0)'}
+            This Season ({formatSeasonRange(seasonId)}){seasonRecord ? ` (${seasonRecord.correct}/${seasonRecord.total})` : ' (0/0)'}
           </div>
         </div>
-        {pickAccuracy !== null && (
+        {SHOW_ALL_TIME_STATS && pickAccuracy !== null && (
           <div className="flex flex-col items-center justify-center" style={{ width: 'max-content' }}>
             <span className="text-xl md:text-3xl font-bold text-gray-400 leading-tight">{pickAccuracy.toFixed(2)}%</span>
             <div className="text-sm md:text-lg text-gray-500 font-medium leading-tight text-center">
