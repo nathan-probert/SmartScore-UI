@@ -67,6 +67,17 @@ function groupHistoryByDay(history: Player[]): HistoryEntry[] {
 }
 
 
+function getSeasonId(d = new Date()): string {
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1; // 1-12
+  if (month >= 8) return `${year}${year + 1}`;
+  return `${year - 1}${year}`;
+}
+
+function getSeasonMetricId(seasonId: string): string {
+  return `season_pick_accuracy_${seasonId}`;
+}
+
 async function newFetchPlayers(table_name: string): Promise<Player[]> {
   const { data, error } = await supabase.from(table_name).select('*');
   if (error) {
@@ -94,6 +105,10 @@ export default function PlayerTables() {
   const [showAllPlayers, setShowAllPlayers] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pickAccuracy, setPickAccuracy] = useState<number | null>(null);
+  const [lifetimeRecord, setLifetimeRecord] = useState<{ correct: number; total: number } | null>(null);
+  const [seasonAccuracy, setSeasonAccuracy] = useState<number | null>(null);
+  const [seasonRecord, setSeasonRecord] = useState<{ correct: number; total: number } | null>(null);
+  const [seasonId, setSeasonId] = useState<string>(() => getSeasonId());
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
 
@@ -122,9 +137,10 @@ export default function PlayerTables() {
         // Set the sorted players and tims groups in the state
         setSortedPlayers({ all: sortedAllPlayers, tims1, tims2, tims3 });
 
-        // Fetch current pick accuracy metric
+        // Fetch lifetime + season pick accuracy metrics (serve both)
         const metricsTable = process.env.NODE_ENV === 'production' ? 'Metrics-prod' : 'Metrics-dev';
-
+        const currentSeasonId = getSeasonId();
+        setSeasonId(currentSeasonId);
 
         const { data: metricData, error: metricError, status, statusText } = await supabase
           .from(metricsTable)
@@ -143,6 +159,31 @@ export default function PlayerTables() {
           setPickAccuracy(metricData.value);
         } else if (metricData && metricData.value) {
           setPickAccuracy(Number(metricData.value));
+        }
+        if (metricData && typeof metricData.correct === 'number' && typeof metricData.total === 'number') {
+          setLifetimeRecord({ correct: metricData.correct, total: metricData.total });
+        }
+
+        const { data: seasonData, error: seasonError } = await supabase
+          .from(metricsTable)
+          .select('*')
+          .eq('id', getSeasonMetricId(currentSeasonId))
+          .single();
+        if (seasonError) {
+          // Missing row = new season with no picks yet; leave as null (renders 0/0).
+          if (seasonError.code !== 'PGRST116') {
+            console.error('[SmartScore] Error fetching season pick accuracy metric:', {
+              table: metricsTable,
+              error: seasonError,
+              seasonData
+            });
+          }
+        } else if (seasonData) {
+          if (typeof seasonData.value === 'number') setSeasonAccuracy(seasonData.value);
+          else if (seasonData.value) setSeasonAccuracy(Number(seasonData.value));
+          if (typeof seasonData.correct === 'number' && typeof seasonData.total === 'number') {
+            setSeasonRecord({ correct: seasonData.correct, total: seasonData.total });
+          }
         }
       } catch (error) {
         console.error('Error fetching players:', error);
@@ -218,13 +259,22 @@ export default function PlayerTables() {
   return (
     <div>
 
-      {/* Desktop: flex row with centered pick percentage; Mobile: stacked layout */}
-      {/* Pick percentage centered at the very top (help button removed) */}
-      <div className="w-full relative mt-6 md:mt-4 px-4 md:px-10" style={{ minHeight: '70px' }}>
+      {/* Season (primary) + lifetime side by side; stacked on mobile */}
+      <div className="w-full mt-6 md:mt-4 px-4 md:px-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16" style={{ minHeight: '70px' }}>
+        <div className="flex flex-col items-center justify-center" style={{ width: 'max-content' }}>
+          <span className="text-3xl md:text-5xl font-bold text-pink-600 leading-tight">
+            {seasonAccuracy !== null ? `${seasonAccuracy.toFixed(2)}%` : '0.00%'}
+          </span>
+          <div className="text-lg md:text-2xl text-gray-500 font-medium leading-tight text-center">
+            This Season {seasonId.length === 8 ? `(${seasonId.slice(0, 4)}-${seasonId.slice(6)})` : ''}{seasonRecord ? ` (${seasonRecord.correct}/${seasonRecord.total})` : ' (0/0)'}
+          </div>
+        </div>
         {pickAccuracy !== null && (
-          <div className="flex flex-col items-center justify-center absolute left-1/2 top-0 transform -translate-x-1/2" style={{ width: 'max-content' }}>
-            <span className="text-3xl md:text-5xl font-bold text-pink-600 leading-tight">{pickAccuracy.toFixed(2)}%</span>
-            <div className="text-lg md:text-2xl text-gray-500 font-medium leading-tight text-center">SmartScore's Current Pick Percentage</div>
+          <div className="flex flex-col items-center justify-center" style={{ width: 'max-content' }}>
+            <span className="text-xl md:text-3xl font-bold text-gray-400 leading-tight">{pickAccuracy.toFixed(2)}%</span>
+            <div className="text-sm md:text-lg text-gray-500 font-medium leading-tight text-center">
+              All-Time{lifetimeRecord ? ` (${lifetimeRecord.correct}/${lifetimeRecord.total})` : ''}
+            </div>
           </div>
         )}
       </div>
