@@ -2,6 +2,10 @@
 
 import { HistoryEntry } from "./Types";
 
+// A full week of games. The bar always lays out this many slots so a partial
+// week (e.g. early season) sits right-aligned instead of stretching edge to edge.
+export const HISTORY_SLOTS = 7;
+
 const formatName = (name: string) => {
     const parts = name.split(' ');
     if (parts.length >= 2) {
@@ -12,6 +16,7 @@ const formatName = (name: string) => {
 
 export function HistoryBar({ history }: { history: HistoryEntry[] }) {
     if (!history || history.length === 0) return null;
+    const emptySlots = Math.max(0, HISTORY_SLOTS - history.length);
     return (
         <div className="flex flex-col items-center mt-6">
             <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg flex justify-center mb-6 px-2">
@@ -20,6 +25,14 @@ export function HistoryBar({ history }: { history: HistoryEntry[] }) {
 
                 {/* History icons with space-between */}
                 <div className="flex justify-between items-center w-full relative">
+                    {/* Invisible placeholders keep the real games pinned to the right end */}
+                    {Array.from({ length: emptySlots }).map((_, index) => (
+                        <div key={`empty-${index}`} aria-hidden="true" className="relative opacity-0 select-none">
+                            <div className={`p-1 rounded-full bg-grey5`}>
+                                <span className="text-2xl sm:text-3xl">🔥</span>
+                            </div>
+                        </div>
+                    ))}
                     {history.map((entry, index) => (
                         <div key={index} className="relative group">
                             <div className={`p-1 rounded-full bg-grey5`}>
