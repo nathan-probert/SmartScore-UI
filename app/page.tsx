@@ -8,7 +8,7 @@ import { TopPicks } from "@/components/TopPicks";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { useTheme } from "next-themes";
-import { HistoryBar } from "@/components/HistoryBar";
+import { HistoryBar, HISTORY_SLOTS } from "@/components/HistoryBar";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 
@@ -57,9 +57,9 @@ function groupHistoryByDay(history: Player[]): HistoryEntry[] {
       .slice(0, 3); // Take top 3 for consistency
   }
 
-  // Sort dates ascending (oldest first) and take at most 7 days
+  // Sort dates ascending (oldest first) and take at most a full week of days
   const uniqueDates = Object.keys(groups).sort();
-  return uniqueDates.slice(-7).map((dateStr) => {
+  return uniqueDates.slice(-HISTORY_SLOTS).map((dateStr) => {
     const players = groups[dateStr].slice(0, 3);
     const scoredCount = players.filter((p) => p.Scored).length;
     return { date: dateStr, players, scoredCount };
