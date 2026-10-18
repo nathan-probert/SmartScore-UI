@@ -84,7 +84,7 @@ const SHOW_ALL_TIME_STATS = false;
 
 // Feature flag: show the primary "This Season" pick accuracy stat.
 // Set to false to hide the season stat entirely.
-const SHOW_THIS_SEASONS_STATS = true;
+const SHOW_THIS_SEASONS_STATS = false;
 
 function formatSeasonRange(seasonId: string): string {
   if (seasonId.length === 8) {
