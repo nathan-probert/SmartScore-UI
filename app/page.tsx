@@ -274,8 +274,17 @@ export default function PlayerTables() {
   return (
     <div>
 
+      {/* Page title — keeps the top of the page intentional when stats are hidden. */}
+      <div className="flex flex-col items-center justify-center mt-10 md:mt-14">
+        <h1 className="text-4xl md:text-6xl font-bold text-primary leading-tight">SmartScore</h1>
+        <p className="text-lg md:text-2xl text-gray-500 font-medium mt-2">
+          NHL Goal Predictions, ranked daily.
+        </p>
+      </div>
+
       {/* Season stat is primary and centered (optional via SHOW_THIS_SEASONS_STATS). All-Time is optional via SHOW_ALL_TIME_STATS. */}
-      <div className="w-full mt-6 md:mt-4 px-4 md:px-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16" style={{ minHeight: '70px' }}>
+      {(SHOW_THIS_SEASONS_STATS || SHOW_ALL_TIME_STATS) && (
+        <div className="w-full mt-6 md:mt-4 px-4 md:px-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16" style={{ minHeight: '70px' }}>
         {SHOW_THIS_SEASONS_STATS && (
           <div className="flex flex-col items-center justify-center" style={{ width: 'max-content' }}>
             <span className="text-3xl md:text-5xl font-bold text-pink-600 leading-tight">
@@ -295,6 +304,7 @@ export default function PlayerTables() {
           </div>
         )}
       </div>
+      )}
       {showAllPlayers ? (
         <>
           <PlayerTable players={sortedPlayers.all} title="All Players" />
