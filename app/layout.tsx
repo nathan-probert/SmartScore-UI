@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Header } from "../components/Header";
@@ -25,9 +25,29 @@ export const metadata: Metadata = {
   applicationName: "Nathan Probert",
   icons: {
     icon: './images/favicon.ico',
-    apple: './images/favicon.ico',
+    apple: './images/icon-180x180.png',
     shortcut: './images/favicon.ico',
   },
+  // iOS PWA: when launched from the Home Screen icon, run standalone
+  // (no browser chrome) with the app title in the status bar.
+  appleWebApp: {
+    capable: true,
+    title: 'SmartScore',
+    statusBarStyle: 'black-translucent',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  // Use the full screen including the notch / Dynamic Island area; the
+  // safe-area insets are handled in globals.css.
+  viewportFit: 'cover',
+  // iOS Safari zooms into focused inputs; keep iOS from pinch-zooming
+  // while a standalone PWA is open.
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#141720',
 };
 
 export default function RootLayout({
