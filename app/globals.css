@@ -38,6 +38,32 @@ body {
   }
 }
 
+/*
+ * iOS standalone PWA: with viewport-fit=cover, the page extends under the
+ * status bar, notch/Dynamic Island, and home indicator. Pad around them
+ * so nothing is obscured or unreachable.
+ */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@supports ((-webkit-touch-callout: none)) {
+  html {
+    /* iOS WebKit doesn't expose display-mode reliably; pad standalone
+       iPhones by the status bar height, desktop Safari isn't affected
+       because env() for safe-area-inset-top is 0 there. */
+    background-color: var(--bg);
+  }
+
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 .nav-icon {
   width: 2.5rem !important;
   height: 2.5rem !important;
