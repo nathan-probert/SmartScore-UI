@@ -31,6 +31,12 @@ const STAT_COLUMNS: StatColumn[] = [
     render: (player) => player.team_name,
   },
   {
+    label: "Tims",
+    advancedOnly: true,
+    tooltip: "Tims group the player is ranked in today (1, 2 or 3)",
+    render: (player) => (player.tims ? String(player.tims) : "—"),
+  },
+  {
     label: "Line",
     advancedOnly: true,
     tooltip: "Projected forward line (F1 = 1st line … F4 = 4th line); D = defence",
@@ -78,10 +84,21 @@ const STAT_COLUMNS: StatColumn[] = [
     render: (player) => player.otga.toFixed(2),
   },
   {
+    label: "Opp",
+    advancedOnly: true,
+    tooltip: "The opposing team (from the opposing starting goalie's team)",
+    render: (player) => player.opp_goalie_team || "—",
+  },
+  {
     label: "Opp Goalie",
     advancedOnly: true,
-    tooltip: "Opposing team's projected starting goalie (Confirmed/Expected per RotoWire)",
-    render: (player) => player.opp_goalie_name || "—",
+    tooltip: "Opposing team's projected starting goalie, with RotoWire confirmation status",
+    render: (player) => {
+      const name = player.opp_goalie_name;
+      if (!name) return "—";
+      const status = player.opp_goalie_status;
+      return status && status !== "Unknown" ? `${name} (${status})` : name;
+    },
   },
   {
     label: "Opp GAA",
@@ -100,6 +117,28 @@ const STAT_COLUMNS: StatColumn[] = [
       // Normalise: some sources report 0.915, the NHL API reports 91.5
       return (sv <= 1.5 ? sv * 100 : sv).toFixed(1);
     },
+  },
+  {
+    label: "Opp Rec",
+    advancedOnly: true,
+    tooltip: "Opposing goalie's season record (W-L-OTL)",
+    render: (player) => player.opp_goalie_record || "—",
+  },
+  {
+    label: "Opp SO",
+    advancedOnly: true,
+    tooltip: "Opposing goalie's shutouts this season",
+    render: (player) =>
+      player.opp_goalie_shutouts != null ? String(player.opp_goalie_shutouts) : "—",
+  },
+  {
+    label: "Opp GP",
+    advancedOnly: true,
+    tooltip: "Games played this season by the opposing goalie",
+    render: (player) =>
+      player.opp_goalie_games_played != null
+        ? String(player.opp_goalie_games_played)
+        : "—",
   },
 ];
 
