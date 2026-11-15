@@ -113,7 +113,6 @@ async function newFetchPlayers(table_name: string): Promise<Player[]> {
 export default function PlayerTables() {
   const [rawPlayers, setRawPlayers] = useState<Player[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [useLegacyStat, setUseLegacyStat] = useState(false);
   const [showAllPlayers, setShowAllPlayers] = useState(false);
   // Simple mode shows a stat summary; advanced mode shows every stat column.
   const [advancedStats, setAdvancedStats] = useState(false);
@@ -127,17 +126,14 @@ export default function PlayerTables() {
   const isDarkMode = theme === 'dark';
 
   const sortedPlayers = useMemo(() => {
-    const activeStat = (p: Player) => (useLegacyStat ? (p.legacy_stat ?? p.stat) : p.stat);
-    const sortedAllPlayers = [...rawPlayers]
-      .map((p) => ({ ...p, stat: activeStat(p) }))
-      .sort((a, b) => b.stat - a.stat);
+    const sortedAllPlayers = [...rawPlayers].sort((a, b) => b.stat - a.stat);
 
     const tims1: Player[] = sortedAllPlayers.filter((player) => Number(player.tims) === 1);
     const tims2: Player[] = sortedAllPlayers.filter((player) => Number(player.tims) === 2);
     const tims3: Player[] = sortedAllPlayers.filter((player) => Number(player.tims) === 3);
 
     return { all: sortedAllPlayers, tims1, tims2, tims3 };
-  }, [rawPlayers, useLegacyStat]);
+  }, [rawPlayers]);
 
   useEffect(() => {
     const loadPlayers = async () => {
@@ -147,11 +143,10 @@ export default function PlayerTables() {
         const history = await newFetchPlayers(process.env.NODE_ENV === 'production' ? 'Historic-Picks-prod' : 'Historic-Picks-dev');
         setHistory(groupHistoryByDay(history));
 
-        // Multiply each player's stat (and legacy_stat) by 100%
+        // Multiply each player's stat by 100%
         const updatedData = data.map(player => ({
           ...player,
-          stat: player.stat * 100,
-          legacy_stat: (player.legacy_stat ?? player.stat) * 100
+          stat: player.stat * 100
         }));
 
         setRawPlayers(updatedData);
@@ -300,20 +295,6 @@ export default function PlayerTables() {
         <p className="text-lg md:text-2xl text-gray-500 font-medium mt-2">
           NHL Goal Predictions, ranked daily.
         </p>
-      </div>
-
-      {/* Small toggle to switch ranking/stat source to legacy_stat */}
-      <div className="flex justify-center mt-4">
-        <label className="inline-flex items-center gap-2 text-sm md:text-base cursor-pointer select-none">
-          <input
-            type="checkbox"
-            className="w-4 h-4"
-            checked={useLegacyStat}
-            onChange={(e) => setUseLegacyStat(e.target.checked)}
-            aria-label="Switch to legacy_stat"
-          />
-          <span>Switch to legacy_stat</span>
-        </label>
       </div>
 
       {/* Simple/Advanced stat display toggle (synced across all stat tables) */}

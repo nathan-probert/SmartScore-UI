@@ -31,6 +31,23 @@ const STAT_COLUMNS: StatColumn[] = [
     render: (player) => player.team_name,
   },
   {
+    label: "Line",
+    advancedOnly: true,
+    tooltip: "Projected forward line (F1 = 1st line … F4 = 4th line); D = defence",
+    render: (player) =>
+      player.lineup_position_group === "D" ? "D" : player.lineup_unit || "—",
+  },
+  {
+    label: "PP",
+    advancedOnly: true,
+    tooltip: "Projected power-play unit (PP1 = 1st unit, more ice time)",
+    render: (player) => {
+      const pp = player.pp_unit;
+      if (!pp) return "—";
+      return pp.includes("2") ? "PP2" : "PP1";
+    },
+  },
+  {
     label: "5GPG",
     advancedOnly: true,
     tooltip: "Goals per game over the player's last 5 games (recent form)",
@@ -59,6 +76,30 @@ const STAT_COLUMNS: StatColumn[] = [
     advancedOnly: true,
     tooltip: "Goals against average of the opposing team's defence",
     render: (player) => player.otga.toFixed(2),
+  },
+  {
+    label: "Opp Goalie",
+    advancedOnly: true,
+    tooltip: "Opposing team's projected starting goalie (Confirmed/Expected per RotoWire)",
+    render: (player) => player.opp_goalie_name || "—",
+  },
+  {
+    label: "Opp GAA",
+    advancedOnly: true,
+    tooltip: "Opposing goalie's goals-against average this season",
+    render: (player) =>
+      player.opp_goalie_gaa != null ? player.opp_goalie_gaa.toFixed(2) : "—",
+  },
+  {
+    label: "Opp SV%",
+    advancedOnly: true,
+    tooltip: "Opposing goalie's save percentage this season",
+    render: (player) => {
+      const sv = player.opp_goalie_save_pct;
+      if (sv == null) return "—";
+      // Normalise: some sources report 0.915, the NHL API reports 91.5
+      return (sv <= 1.5 ? sv * 100 : sv).toFixed(1);
+    },
   },
 ];
 
