@@ -7,6 +7,7 @@ export interface Player {
   hgpg: number;
   five_gpg: number;
   stat: number;
+  legacy_stat?: number;
   tims: number;
   team_name: string;
   tgpg: number;

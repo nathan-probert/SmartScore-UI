@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PlayerTable } from "@/components/PlayerTable";
 import { SmartScoreModeToggle } from "@/components/SmartScoreModeToggle";
+import { StatDisplayToggle } from "@/components/StatDisplayToggle";
 import { Player, HistoryEntry } from "@/components/Types";
 import { CircleHelp } from "lucide-react";
 import { TopPicks } from "@/components/TopPicks";
@@ -110,14 +111,12 @@ async function newFetchPlayers(table_name: string): Promise<Player[]> {
 }
 
 export default function PlayerTables() {
-  const [sortedPlayers, setSortedPlayers] = useState<{ all: Player[], tims1: Player[], tims2: Player[], tims3: Player[] }>({
-    all: [],
-    tims1: [],
-    tims2: [],
-    tims3: []
-  });
+  const [rawPlayers, setRawPlayers] = useState<Player[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [useLegacyStat, setUseLegacyStat] = useState(false);
   const [showAllPlayers, setShowAllPlayers] = useState(false);
+  // Simple mode shows a stat summary; advanced mode shows every stat column.
+  const [advancedStats, setAdvancedStats] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pickAccuracy, setPickAccuracy] = useState<number | null>(null);
   const [lifetimeRecord, setLifetimeRecord] = useState<{ correct: number; total: number } | null>(null);
@@ -127,6 +126,19 @@ export default function PlayerTables() {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
 
+  const sortedPlayers = useMemo(() => {
+    const activeStat = (p: Player) => (useLegacyStat ? (p.legacy_stat ?? p.stat) : p.stat);
+    const sortedAllPlayers = [...rawPlayers]
+      .map((p) => ({ ...p, stat: activeStat(p) }))
+      .sort((a, b) => b.stat - a.stat);
+
+    const tims1: Player[] = sortedAllPlayers.filter((player) => Number(player.tims) === 1);
+    const tims2: Player[] = sortedAllPlayers.filter((player) => Number(player.tims) === 2);
+    const tims3: Player[] = sortedAllPlayers.filter((player) => Number(player.tims) === 3);
+
+    return { all: sortedAllPlayers, tims1, tims2, tims3 };
+  }, [rawPlayers, useLegacyStat]);
+
   useEffect(() => {
     const loadPlayers = async () => {
       try {
@@ -135,22 +147,14 @@ export default function PlayerTables() {
         const history = await newFetchPlayers(process.env.NODE_ENV === 'production' ? 'Historic-Picks-prod' : 'Historic-Picks-dev');
         setHistory(groupHistoryByDay(history));
 
-        // Multiply each player's stat by 100%
+        // Multiply each player's stat (and legacy_stat) by 100%
         const updatedData = data.map(player => ({
           ...player,
-          stat: player.stat * 100
+          stat: player.stat * 100,
+          legacy_stat: (player.legacy_stat ?? player.stat) * 100
         }));
 
-        // Sort the entire array once by stat
-        const sortedAllPlayers = updatedData.sort((a, b) => b.stat - a.stat);
-
-        // Create the tims groups from the sorted array
-        const tims1: Player[] = sortedAllPlayers.filter(player => Number(player.tims) === 1);
-        const tims2: Player[] = sortedAllPlayers.filter(player => Number(player.tims) === 2);
-        const tims3: Player[] = sortedAllPlayers.filter(player => Number(player.tims) === 3);
-
-        // Set the sorted players and tims groups in the state
-        setSortedPlayers({ all: sortedAllPlayers, tims1, tims2, tims3 });
+        setRawPlayers(updatedData);
 
         // Fetch lifetime + season pick accuracy metrics (serve both)
         const metricsTable = process.env.NODE_ENV === 'production' ? 'Metrics-prod' : 'Metrics-dev';
@@ -209,8 +213,24 @@ export default function PlayerTables() {
     loadPlayers();
   }, []);
 
+  // Restore the saved stat display mode after mount (avoids SSR/hydration mismatch)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('smartscore-stat-mode') === 'advanced') {
+        setAdvancedStats(true);
+      }
+    } catch { /* localStorage unavailable */ }
+  }, []);
+
   const handleToggleChange = () => {
     setShowAllPlayers(!showAllPlayers);
+  };
+
+  const handleStatDisplayChange = (advanced: boolean) => {
+    setAdvancedStats(advanced);
+    try {
+      localStorage.setItem('smartscore-stat-mode', advanced ? 'advanced' : 'simple');
+    } catch { /* localStorage unavailable — mode just won't persist */ }
   };
 
   if (loading) {
@@ -282,6 +302,25 @@ export default function PlayerTables() {
         </p>
       </div>
 
+      {/* Small toggle to switch ranking/stat source to legacy_stat */}
+      <div className="flex justify-center mt-4">
+        <label className="inline-flex items-center gap-2 text-sm md:text-base cursor-pointer select-none">
+          <input
+            type="checkbox"
+            className="w-4 h-4"
+            checked={useLegacyStat}
+            onChange={(e) => setUseLegacyStat(e.target.checked)}
+            aria-label="Switch to legacy_stat"
+          />
+          <span>Switch to legacy_stat</span>
+        </label>
+      </div>
+
+      {/* Simple/Advanced stat display toggle (synced across all stat tables) */}
+      <div className="flex justify-center mt-4">
+        <StatDisplayToggle advanced={advancedStats} onChange={handleStatDisplayChange} />
+      </div>
+
       {/* Season stat is primary and centered (optional via SHOW_THIS_SEASONS_STATS). All-Time is optional via SHOW_ALL_TIME_STATS. */}
       {(SHOW_THIS_SEASONS_STATS || SHOW_ALL_TIME_STATS) && (
         <div className="w-full mt-6 md:mt-4 px-4 md:px-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16" style={{ minHeight: '70px' }}>
@@ -307,7 +346,7 @@ export default function PlayerTables() {
       )}
       {showAllPlayers ? (
         <>
-          <PlayerTable players={sortedPlayers.all} title="All Players" />
+          <PlayerTable players={sortedPlayers.all} title="All Players" advanced={advancedStats} />
         </>
       ) : (
         <>
@@ -344,9 +383,9 @@ export default function PlayerTables() {
               <div className="w-full flex justify-center my-6">
                 <div className="w-full max-w-3xl h-1 bg-gray-700 rounded" />
               </div>
-              <PlayerTable players={sortedPlayers.tims1} title="Tims Group 1" />
-              <PlayerTable players={sortedPlayers.tims2} title="Tims Group 2" />
-              <PlayerTable players={sortedPlayers.tims3} title="Tims Group 3" />
+              <PlayerTable players={sortedPlayers.tims1} title="Tims Group 1" advanced={advancedStats} />
+              <PlayerTable players={sortedPlayers.tims2} title="Tims Group 2" advanced={advancedStats} />
+              <PlayerTable players={sortedPlayers.tims3} title="Tims Group 3" advanced={advancedStats} />
             </>
           )}
         </>
