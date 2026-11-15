@@ -16,7 +16,7 @@ const TH_TOOLTIP =
 
 type StatColumn = {
   label: string;
-  /** Shown only in advanced mode when true */
+  /** Shown only in advanced mode when true; columns without it show in simple mode too */
   advancedOnly?: boolean;
   tooltip: string;
   render: (player: Player) => ReactNode;
@@ -29,12 +29,6 @@ const STAT_COLUMNS: StatColumn[] = [
     label: "Team",
     tooltip: "The NHL team the player is on",
     render: (player) => player.team_name,
-  },
-  {
-    label: "Tims",
-    advancedOnly: true,
-    tooltip: "Tims group the player is ranked in today (1, 2 or 3)",
-    render: (player) => (player.tims ? String(player.tims) : "—"),
   },
   {
     label: "Line",
@@ -55,13 +49,11 @@ const STAT_COLUMNS: StatColumn[] = [
   },
   {
     label: "5GPG",
-    advancedOnly: true,
     tooltip: "Goals per game over the player's last 5 games (recent form)",
     render: (player) => player.five_gpg.toFixed(2),
   },
   {
     label: "GPG",
-    advancedOnly: true,
     tooltip: "Season goals per game",
     render: (player) => player.gpg.toFixed(2),
   },
