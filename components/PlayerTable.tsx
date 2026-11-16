@@ -22,7 +22,7 @@ type StatColumn = {
   render: (player: Player) => ReactNode;
 };
 
-// The name/percent columns are rendered separately because they are sticky,
+// The name column is rendered separately because it is sticky,
 // so this config only covers the scrollable stat columns.
 const STAT_COLUMNS: StatColumn[] = [
   {
@@ -153,7 +153,7 @@ export function PlayerTable({ players, title, advanced = false }: PlayerTablePro
                 Name
                 <span className={TH_TOOLTIP}>Player Name</span>
               </th>
-              <th className="cursor-default sticky left-[20%] z-10 bg-grey3 text-md md:text-2xl text-grey2 px-0 py-2 border border-grey2 group">
+              <th className="group cursor-default text-md md:text-2xl text-grey2 px-4 py-2 bg-grey3 border border-grey2 text-center relative">
                 %
                 <span className={TH_TOOLTIP}>
                   SmartScore: the player&apos;s probability of scoring a goal in today&apos;s game
@@ -192,7 +192,7 @@ export function PlayerTable({ players, title, advanced = false }: PlayerTablePro
                     )}
                   </td>
                   <td
-                    className={`sticky left-[20%] z-10 px-2 py-2 md:text-xl text-sm border border-grey2 text-center ${rowBg}`}
+                    className={`px-2 py-2 md:text-xl text-sm border border-grey2 text-center ${rowBg}`}
                   >
                     {player.stat.toFixed(2)}
                   </td>
