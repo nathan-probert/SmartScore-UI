@@ -4,7 +4,6 @@ import { PlayerTable } from "@/components/PlayerTable";
 import { SmartScoreModeToggle } from "@/components/SmartScoreModeToggle";
 import { StatDisplayToggle } from "@/components/StatDisplayToggle";
 import { Player, HistoryEntry } from "@/components/Types";
-import { CircleHelp } from "lucide-react";
 import { TopPicks } from "@/components/TopPicks";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";

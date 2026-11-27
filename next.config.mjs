@@ -1,4 +1,4 @@
-export default {
+const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
   reactStrictMode: true,
   basePath: '',  // No base path for local or production. Keep it at the root level.
@@ -12,3 +12,5 @@ export default {
     ];
   },
 };
+
+export default nextConfig;

@@ -14,8 +14,8 @@ export function SmartScoreModeToggle({ onClick }: LogoProps) {
       after:content-[''] after:bg-slate-900 after:w-[56px] after:h-[56px] after:rounded-full after:absolute
       after:bottom-[6px] after:left-[6px] peer-checked:after:translate-x-[52px] after:transition-transform after:duration-[.4s]
       dark:after:bg-slate-200 dark:bg-slate-400">
-        <img src="/images/tim-hortons.png" className="w-12 h-12"/>
-        <img src="/images/NHL.png" className="w-12 h-12"/>
+        <img src="/images/tim-hortons.png" alt="Tims" className="w-12 h-12"/>
+        <img src="/images/NHL.png" alt="NHL" className="w-12 h-12"/>
       </div>
     </label>  
   );
