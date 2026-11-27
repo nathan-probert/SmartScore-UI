@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import type { User } from "@supabase/supabase-js";
 
 type UserPreferences = {
     user_id: string;
@@ -9,7 +10,7 @@ type UserPreferences = {
 };
 
 export default function AccountPage() {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [prefs, setPrefs] = useState<UserPreferences | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
