@@ -31,31 +31,14 @@ const STAT_COLUMNS: StatColumn[] = [
     render: (player) => player.team_name,
   },
   {
-    label: "Line",
-    advancedOnly: true,
-    tooltip: "Projected forward line (F1 = 1st line … F4 = 4th line); D = defence",
-    render: (player) =>
-      player.lineup_position_group === "D" ? "D" : player.lineup_unit || "—",
-  },
-  {
-    label: "PP",
-    advancedOnly: true,
-    tooltip: "Projected power-play unit (PP1 = 1st unit, more ice time)",
-    render: (player) => {
-      const pp = player.pp_unit;
-      if (!pp) return "—";
-      return pp.includes("2") ? "PP2" : "PP1";
-    },
+    label: "GPG",
+    tooltip: "Season goals per game",
+    render: (player) => player.gpg.toFixed(2),
   },
   {
     label: "5GPG",
     tooltip: "Goals per game over the player's last 5 games (recent form)",
     render: (player) => player.five_gpg.toFixed(2),
-  },
-  {
-    label: "GPG",
-    tooltip: "Season goals per game",
-    render: (player) => player.gpg.toFixed(2),
   },
   {
     label: "HGPG",
@@ -74,6 +57,23 @@ const STAT_COLUMNS: StatColumn[] = [
     advancedOnly: true,
     tooltip: "Goals against average of the opposing team's defence",
     render: (player) => player.otga.toFixed(2),
+  },
+  {
+    label: "Line",
+    advancedOnly: true,
+    tooltip: "Projected forward line (F1 = 1st line … F4 = 4th line); D = defence",
+    render: (player) =>
+      player.lineup_position_group === "D" ? "D" : player.lineup_unit || "—",
+  },
+  {
+    label: "PP",
+    advancedOnly: true,
+    tooltip: "Projected power-play unit (PP1 = 1st unit, more ice time)",
+    render: (player) => {
+      const pp = player.pp_unit;
+      if (!pp) return "—";
+      return pp.includes("2") ? "PP2" : "PP1";
+    },
   },
   {
     label: "Opp",
